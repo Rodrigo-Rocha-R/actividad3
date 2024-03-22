@@ -9,7 +9,7 @@ Exercises
 5. Make the ghosts smarter.
 """
 
-from random import choice
+from random import choice,randint
 from turtle import *
 
 from freegames import floor, vector
@@ -19,6 +19,8 @@ path = Turtle(visible=False)
 writer = Turtle(visible=False)
 aim = vector(5, 0)
 pacman = vector(-40, -80)
+pacman_speed = 1 
+ghost_speed = 15   
 ghosts = [
     [vector(-180, 160), vector(5, 0)],
     [vector(-180, -160), vector(0, 5)],
@@ -107,12 +109,7 @@ def world():
                 path.goto(x + 10, y + 10)
                 path.dot(2, 'white')
 
-from random import randint
-
-from random import randint
-
-from random import randint
-
+# En la función move(), ajusta la velocidad de Pacman
 def move():
     """Move pacman and all ghosts."""
     writer.undo()
@@ -121,7 +118,7 @@ def move():
     clear()
 
     if valid(pacman + aim):
-        pacman.move(aim)
+        pacman.move(aim * pacman_speed)
 
     index = offset(pacman)
 
@@ -137,28 +134,32 @@ def move():
     dot(20, 'yellow')
 
     for ghost, course in ghosts:
-        # Calcula la direccion hacia la cual mover el fantasma para seguir al Pacman
-        dx = pacman.x - ghost.x
-        dy = pacman.y - ghost.y
+        # Calcula la distancia entre el fantasma y Pacman
+        distance = abs(pacman - ghost)
 
-        #De acuerdo a la distancia del pacman, toma decision de moverse
-        if dx != 0:
-            direction_x = dx / abs(dx) * 5  
+        # Si la distancia es menor o igual a 3 espacios, el fantasma persigue a Pacman; de lo contrario, se mueve aleatoriamente
+        if distance <= 60:  # 3 espacios * 20 (tamaño de cada espacio)
+            dx = pacman.x - ghost.x
+            dy = pacman.y - ghost.y
+
+            if dx != 0:
+                direction_x = dx / abs(dx) * ghost_speed
+            else:
+                direction_x = 0
+
+            if dy != 0:
+                direction_y = dy / abs(dy) * ghost_speed
+            else:
+                direction_y = 0
+
+            course.x = direction_x
+            course.y = direction_y
         else:
-            direction_x = 0
+            # Movimiento aleatorio
+            course.x = choice([-ghost_speed, 0, ghost_speed])
+            course.y = choice([-ghost_speed, 0, ghost_speed])
 
-        if dy != 0:
-            direction_y = dy / abs(dy) * 5  
-        else:
-            direction_y = 0
-
-        random_direction = vector(randint(-5, 5), randint(-5, 5))
-
-        # Combina la direccion hacia Pacman con la componente aleatoria
-        course.x = direction_x + random_direction.x
-        course.y = direction_y + random_direction.y
-
-        # Si el nuevo movimiento es valido, mueve el fantasma en esa direccion
+        # Si el nuevo movimiento es válido, mueve el fantasma en esa dirección
         if valid(ghost + course):
             ghost.move(course)
 
@@ -173,6 +174,7 @@ def move():
             return
 
     ontimer(move, 100)
+
 
 def change(x, y):
     """Change pacman aim if valid."""
