@@ -106,6 +106,11 @@ def world():
                 path.goto(x + 10, y + 10)
                 path.dot(2, 'white')
 
+from random import randint
+
+from random import randint
+
+from random import randint
 
 def move():
     """Move pacman and all ghosts."""
@@ -130,32 +135,43 @@ def move():
     goto(pacman.x + 10, pacman.y + 10)
     dot(20, 'yellow')
 
-    for point, course in ghosts:
-        if valid(point + course):
-            point.move(course)
+    for ghost, course in ghosts:
+        # Calcula la direccion hacia la cual mover el fantasma para seguir al Pacman
+        dx = pacman.x - ghost.x
+        dy = pacman.y - ghost.y
+
+        #De acuerdo a la distancia del pacman, toma decision de moverse
+        if dx != 0:
+            direction_x = dx / abs(dx) * 5  
         else:
-            options = [
-                vector(5, 0),
-                vector(-5, 0),
-                vector(0, 5),
-                vector(0, -5),
-            ]
-            plan = choice(options)
-            course.x = plan.x
-            course.y = plan.y
+            direction_x = 0
+
+        if dy != 0:
+            direction_y = dy / abs(dy) * 5  
+        else:
+            direction_y = 0
+
+        random_direction = vector(randint(-5, 5), randint(-5, 5))
+
+        # Combina la direccion hacia Pacman con la componente aleatoria
+        course.x = direction_x + random_direction.x
+        course.y = direction_y + random_direction.y
+
+        # Si el nuevo movimiento es valido, mueve el fantasma en esa direccion
+        if valid(ghost + course):
+            ghost.move(course)
 
         up()
-        goto(point.x + 10, point.y + 10)
+        goto(ghost.x + 10, ghost.y + 10)
         dot(20, 'red')
 
     update()
 
-    for point, course in ghosts:
-        if abs(pacman - point) < 20:
+    for ghost, _ in ghosts:
+        if abs(pacman - ghost) < 20:
             return
 
     ontimer(move, 100)
-
 
 def change(x, y):
     """Change pacman aim if valid."""
